@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Portal - Send Files to Buyer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8fafc; }
+        .container { max-width: 600px; margin-top: 60px; }
+        .card { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+        .file-list { max-height: 250px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card p-4">
+        <h2 class="mb-4 text-center">🤝 Supplier Portal</h2>
+        <p class="text-center text-muted mb-4">Upload your documents (PDF, Excel, Images) to send them securely to your buyer. You can also extract data from your files before sending.</p>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert alert-info">
+              {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <form method="post" enctype="multipart/form-data" class="mb-4">
+            <div class="input-group">
+                <input type="file" class="form-control" name="file" accept=".pdf,.xls,.xlsx,.jpg,.png" required>
+                <button class="btn btn-primary" type="submit">Send to Buyer</button>
+            </div>
+        </form>
+        <h5>Files Ready to Send</h5>
+        <ul class="list-group file-list mb-2">
+            {% for file in files %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ file }}
+                <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
+                {% set ext = file.rsplit('.', 1)[1].lower() %}
+                {% if ext in ['jpg', 'png', 'pdf'] %}
+                <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}')">Preview Data Extraction</button>
+                {% endif %}
+            </li>
+            {% else %}
+            <li class="list-group-item text-muted">No files uploaded yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</ul>
+<!-- Modal -->
+<div class="modal fade" id="extractModal" tabindex="-1" aria-labelledby="extractModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="extractModalLabel">Data Extraction Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="extractModalBody">
+            Loading data from your file for the buyer...
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function extractData(filename) {
+        const modal = new bootstrap.Modal(document.getElementById('extractModal'));
+        document.getElementById('extractModalBody').innerHTML = 'Loading...';
+        modal.show();
+        fetch(`/extract/${filename}`, {method: 'POST'})
+                .then(r => r.json())
+                .then(data => {
+                        if (data.error) {
+                                document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>${data.error}</span>`;
+                        } else {
+                                document.getElementById('extractModalBody').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                        }
+                })
+                .catch(e => {
+                        document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
+                });
+}
+</script>
+</body>
+</html>
