@@ -1,3 +1,7 @@
+
+# ...existing code...
+
+# Place this after app = Flask(__name__) and other route definitions
 @app.route('/delete/<filename>', methods=['POST'])
 def delete_file(filename):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
