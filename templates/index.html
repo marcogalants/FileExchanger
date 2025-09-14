@@ -34,12 +34,17 @@
         <ul class="list-group file-list mb-2">
             {% for file in files %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ file }}
-                <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
-                {% set ext = file.rsplit('.', 1)[1].lower() %}
-                {% if ext in ['jpg', 'png', 'pdf'] %}
-                <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}')">Preview Data Extraction</button>
-                {% endif %}
+                <span>{{ file }}</span>
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
+                    {% set ext = file.rsplit('.', 1)[1].lower() %}
+                    {% if ext in ['jpg', 'png', 'pdf'] %}
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}')">Preview Data Extraction</button>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('Delete {{ file }}?')">Delete</button>
+                    </form>
+                </div>
             </li>
             {% else %}
             <li class="list-group-item text-muted">No files uploaded yet.</li>

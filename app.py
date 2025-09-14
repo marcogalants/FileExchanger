@@ -1,3 +1,15 @@
+@app.route('/delete/<filename>', methods=['POST'])
+def delete_file(filename):
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            flash(f'{filename} deleted successfully.')
+        except Exception as e:
+            flash(f'Error deleting {filename}: {e}')
+    else:
+        flash(f'File {filename} not found.')
+    return redirect(url_for('upload_file'))
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash, jsonify
 import os
 import shutil
