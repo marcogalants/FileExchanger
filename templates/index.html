@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supplier Portal - Send Files to Buyer</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #f8fafc; }
@@ -41,9 +42,7 @@
                     {% if ext in ['jpg', 'png', 'pdf'] %}
                     <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}')">Preview Data Extraction</button>
                     {% endif %}
-                    <form method="post" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('Delete {{ file }}?')">Delete</button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteModal('{{ file }}')">Delete</button>
                 </div>
             </li>
             {% else %}
@@ -52,7 +51,28 @@
         </ul>
     </div>
 </div>
-</ul>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm File Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-exclamation-triangle text-danger mb-3" viewBox="0 0 16 16">
+                    <path d="M7.938 2.016a.13.13 0 0 1 .125 0l6.857 11.856c.06.104-.015.228-.125.228H1.205a.145.145 0 0 1-.125-.228L7.938 2.016zm.823-1.447a1.13 1.13 0 0 0-1.624 0L.28 12.425C-.457 13.566.345 15 1.606 15h12.788c1.26 0 2.063-1.434 1.325-2.575L8.76.57z"/>
+                    <path d="M7.002 11a1 1 0 1 0 2 0 1 1 0 0 0-2 0zm.93-7.481a.5.5 0 0 1 .992 0l.35 6.002a.5.5 0 0 1-.992 0l-.35-6.002z"/>
+                </svg>
+                <div id="deleteModalText" class="mb-3">Are you sure you want to delete this file?</div>
+                <form id="deleteForm" method="post" action="">
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="extractModal" tabindex="-1" aria-labelledby="extractModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -70,21 +90,32 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function extractData(filename) {
-        const modal = new bootstrap.Modal(document.getElementById('extractModal'));
-        document.getElementById('extractModalBody').innerHTML = 'Loading...';
-        modal.show();
-        fetch(`/extract/${filename}`, {method: 'POST'})
-                .then(r => r.json())
-                .then(data => {
-                        if (data.error) {
-                                document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>${data.error}</span>`;
-                        } else {
-                                document.getElementById('extractModalBody').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-                        }
-                })
-                .catch(e => {
-                        document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
-                });
+    const modal = new bootstrap.Modal(document.getElementById('extractModal'));
+    document.getElementById('extractModalBody').innerHTML = 'Loading...';
+    modal.show();
+    fetch(`/extract/${filename}`, {method: 'POST'})
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>${data.error}</span>`;
+            } else {
+                document.getElementById('extractModalBody').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        })
+        .catch(e => {
+            document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
+        });
+}
+
+let deleteModal = null;
+function showDeleteModal(filename) {
+    if (!deleteModal) {
+        deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    }
+    document.getElementById('deleteModalText').innerText = `Are you sure you want to delete "${filename}"?`;
+    const form = document.getElementById('deleteForm');
+    form.action = `/delete/${filename}`;
+    deleteModal.show();
 }
 </script>
 </body>
