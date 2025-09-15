@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash, jsonify
 import os
 import shutil
+import json
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -50,13 +51,23 @@ def upload_file():
     return render_template('index.html', files=files)
 
 
-# Extraction endpoint for jpg, png, pdf
-@app.route('/extract/<filename>', methods=['POST'])
+
+# Extraction endpoint for jpg, png, pdf (POST = refresh, GET = view cached)
+@app.route('/extract/<filename>', methods=['GET', 'POST'])
 def extract_data(filename):
     ext = filename.rsplit('.', 1)[1].lower()
     if ext not in ['jpg', 'png', 'pdf']:
         return jsonify({'error': 'Extraction only supported for jpg, png, pdf files.'}), 400
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    json_path = file_path + '.json'
+    if request.method == 'GET':
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as jf:
+                data = json.load(jf)
+            return jsonify(data)
+        else:
+            return jsonify({'error': 'No extraction data found. Please extract first.'}), 404
+    # POST: refresh extraction
     if not os.path.exists(file_path):
         return jsonify({'error': 'File not found.'}), 404
     with open(file_path, 'rb') as f:
@@ -75,6 +86,9 @@ def extract_data(filename):
             response = requests.post(IDP_API_URL, files=files, headers=headers)
             response.raise_for_status()
             data = response.json()
+            # Save the full extraction result to .json file
+            with open(json_path, 'w', encoding='utf-8') as jf:
+                json.dump(data, jf, ensure_ascii=False, indent=2)
             # Only return the 'result' property if present
             if 'result' in data:
                 return jsonify({'result': data['result']})

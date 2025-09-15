@@ -40,7 +40,13 @@
                     <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
                     {% set ext = file.rsplit('.', 1)[1].lower() %}
                     {% if ext in ['jpg', 'png', 'pdf'] %}
-                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}')">Preview Data Extraction</button>
+                        {% set json_file = file + '.json' %}
+                        {% if json_file in files %}
+                            <button class="btn btn-sm btn-outline-info ms-2" onclick="extractData('{{ file }}', true)">View Extraction Data</button>
+                            <button class="btn btn-sm btn-outline-warning ms-2" onclick="extractData('{{ file }}', false)">Refresh Extraction Data</button>
+                        {% else %}
+                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}', false)">Extract Data</button>
+                        {% endif %}
                     {% endif %}
                     <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteModal('{{ file }}')">Delete</button>
                 </div>
@@ -89,11 +95,11 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function extractData(filename) {
+function extractData(filename, viewOnly) {
     const modal = new bootstrap.Modal(document.getElementById('extractModal'));
     document.getElementById('extractModalBody').innerHTML = 'Loading...';
     modal.show();
-    fetch(`/extract/${filename}`, {method: 'POST'})
+    fetch(`/extract/${filename}`, {method: viewOnly ? 'GET' : 'POST'})
         .then(r => r.json())
         .then(data => {
             if (data.error) {
@@ -102,7 +108,6 @@ function extractData(filename) {
                 document.getElementById('extractModalBody').innerHTML = renderFancyTable(data);
             }
         })
-
         .catch(e => {
             document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
         });
