@@ -36,8 +36,7 @@
         </form>
         <h5>Files Ready to Send</h5>
         <ul class="list-group file-list mb-2">
-            {% set real_files = files | reject('search', '\\.json$') | list %}
-            {% for file in real_files %}
+            {% for file in files %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ file }}</span>
                 <div class="btn-group" role="group">
@@ -45,7 +44,7 @@
                     {% set ext = file.rsplit('.', 1)[1].lower() %}
                     {% set json_file = file + '.json' %}
                     {% if ext in ['jpg', 'png', 'pdf'] %}
-                        {% if json_file in files %}
+                        {% if json_file in all_files %}
                             <button class="btn btn-sm btn-outline-info ms-2" onclick="extractData('{{ file }}', true)">View Extraction Data</button>
                             <button class="btn btn-sm btn-outline-warning ms-2" onclick="extractData('{{ file }}', false)">Refresh Extraction Data</button>
                         {% else %}

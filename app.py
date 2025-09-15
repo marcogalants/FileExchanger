@@ -47,8 +47,9 @@ def upload_file():
         else:
             flash('Allowed file types are pdf, jpg, png, xls, xlsx')
             return redirect(request.url)
-    files = os.listdir(app.config['UPLOAD_FOLDER'])
-    return render_template('index.html', files=files)
+    all_files = os.listdir(app.config['UPLOAD_FOLDER'])
+    files = [f for f in all_files if not f.endswith('.json')]
+    return render_template('index.html', files=files, all_files=all_files)
 
 
 
