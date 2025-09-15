@@ -159,26 +159,43 @@ function showJsonView() {
 }
 
 // Recursively render JSON as a fancy Bootstrap table
-function renderFancyTable(obj, parentKey = '') {
+function getJsonDepth(obj) {
+    if (typeof obj !== 'object' || obj === null) return 0;
+    if (Array.isArray(obj)) {
+        if (obj.length === 0) return 1;
+        return 1 + Math.max(...obj.map(getJsonDepth));
+    }
+    let max = 0;
+    for (const key in obj) {
+        if (Object.hasOwn(obj, key)) {
+            max = Math.max(max, getJsonDepth(obj[key]));
+        }
+    }
+    return 1 + max;
+}
+
+function renderFancyTable(obj, parentKey = '', depth = null) {
+    if (depth === null) depth = getJsonDepth(obj);
+    const isDeep = depth > 4;
     if (typeof obj !== 'object' || obj === null) {
         return `<span>${escapeHtml(obj)}</span>`;
     }
     if (Array.isArray(obj)) {
-        let rows = obj.map((item, idx) => `<tr><th class='bg-light'>${parentKey}[${idx}]</th><td>${renderFancyTable(item, parentKey + '[' + idx + ']')}</td></tr>`).join('');
-    return `<div class="table-responsive" style="width:100%;"><table class="table table-bordered table-striped align-middle w-100"><tbody>${rows}</tbody></table></div>`;
+        let rows = obj.map((item, idx) => `<tr><th class='bg-light'>${parentKey}[${idx}]</th><td>${renderFancyTable(item, parentKey + '[' + idx + ']', depth - 1)}</td></tr>`).join('');
+        return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped align-middle w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
     }
     let rows = '';
     for (const key in obj) {
         if (Object.hasOwn(obj, key)) {
             const value = obj[key];
             if (typeof value === 'object' && value !== null) {
-                rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${renderFancyTable(value, parentKey ? parentKey + '.' + key : key)}</td></tr>`;
+                rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${renderFancyTable(value, parentKey ? parentKey + '.' + key : key, depth - 1)}</td></tr>`;
             } else {
                 rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`;
             }
         }
     }
-    return `<div class="table-responsive" style="width:100%;"><table class="table table-bordered table-striped align-middle w-100"><tbody>${rows}</tbody></table></div>`;
+    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped align-middle w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
 }
 
 function escapeHtml(text) {
