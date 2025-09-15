@@ -91,29 +91,65 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="extractModalBody">
-            Loading data from your file for the buyer...
+            <div id="extractModalControls" class="mb-3" style="display:none;">
+                <button id="toggleTableBtn" class="btn btn-outline-secondary btn-sm me-2" onclick="showTableView()">Table View</button>
+                <button id="toggleJsonBtn" class="btn btn-outline-secondary btn-sm" onclick="showJsonView()">Raw JSON</button>
+            </div>
+            <div id="extractModalContent">Loading data from your file for the buyer...</div>
             </div>
         </div>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+let lastExtractedData = null;
+let lastExtractedError = null;
+let lastExtractedMode = 'table';
 function extractData(filename, viewOnly) {
     const modal = new bootstrap.Modal(document.getElementById('extractModal'));
-    document.getElementById('extractModalBody').innerHTML = 'Loading...';
+    document.getElementById('extractModalControls').style.display = 'none';
+    document.getElementById('extractModalContent').innerHTML = 'Loading...';
     modal.show();
     fetch(`/extract/${filename}`, {method: viewOnly ? 'GET' : 'POST'})
         .then(r => r.json())
         .then(data => {
+            lastExtractedData = data;
+            lastExtractedError = data.error || null;
             if (data.error) {
-                document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>${data.error}</span>`;
+                document.getElementById('extractModalControls').style.display = 'none';
+                document.getElementById('extractModalContent').innerHTML = `<span class='text-danger'>${data.error}</span>`;
             } else {
-                document.getElementById('extractModalBody').innerHTML = renderFancyTable(data);
+                document.getElementById('extractModalControls').style.display = '';
+                lastExtractedMode = 'table';
+                showTableView();
             }
         })
         .catch(e => {
-            document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
+            document.getElementById('extractModalControls').style.display = 'none';
+            document.getElementById('extractModalContent').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
         });
+}
+
+function showTableView() {
+    if (lastExtractedError) {
+        document.getElementById('extractModalContent').innerHTML = `<span class='text-danger'>${lastExtractedError}</span>`;
+        return;
+    }
+    document.getElementById('toggleTableBtn').classList.add('active');
+    document.getElementById('toggleJsonBtn').classList.remove('active');
+    document.getElementById('extractModalContent').innerHTML = renderFancyTable(lastExtractedData);
+    lastExtractedMode = 'table';
+}
+
+function showJsonView() {
+    if (lastExtractedError) {
+        document.getElementById('extractModalContent').innerHTML = `<span class='text-danger'>${lastExtractedError}</span>`;
+        return;
+    }
+    document.getElementById('toggleTableBtn').classList.remove('active');
+    document.getElementById('toggleJsonBtn').classList.add('active');
+    document.getElementById('extractModalContent').innerHTML = `<pre style='max-height:60vh;overflow:auto;'>${escapeHtml(JSON.stringify(lastExtractedData, null, 2))}</pre>`;
+    lastExtractedMode = 'json';
 }
 
 // Recursively render JSON as a fancy Bootstrap table
