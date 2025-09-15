@@ -99,12 +99,32 @@ function extractData(filename) {
             if (data.error) {
                 document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>${data.error}</span>`;
             } else {
-                document.getElementById('extractModalBody').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                document.getElementById('extractModalBody').innerHTML = renderFancyTable(data);
             }
         })
+
         .catch(e => {
             document.getElementById('extractModalBody').innerHTML = `<span class='text-danger'>Error: ${e}</span>`;
         });
+}
+
+// Recursively render JSON as a fancy Bootstrap table
+function renderFancyTable(obj, parentKey = '') {
+    if (typeof obj !== 'object' || obj === null) {
+        return `<span>${obj}</span>`;
+    }
+    let rows = '';
+    for (const key in obj) {
+        if (Object.hasOwn(obj, key)) {
+            const value = obj[key];
+            if (typeof value === 'object' && value !== null) {
+                rows += `<tr><th class="bg-light">${parentKey ? parentKey + '.' : ''}${key}</th><td>${renderFancyTable(value, parentKey ? parentKey + '.' + key : key)}</td></tr>`;
+            } else {
+                rows += `<tr><th class="bg-light">${parentKey ? parentKey + '.' : ''}${key}</th><td>${value}</td></tr>`;
+            }
+        }
+    }
+    return `<div class="table-responsive"><table class="table table-bordered table-striped align-middle"><tbody>${rows}</tbody></table></div>`;
 }
 
 let deleteModal = null;
