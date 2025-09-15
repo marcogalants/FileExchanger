@@ -182,7 +182,7 @@ function renderFancyTable(obj, parentKey = '', depth = null) {
     }
     if (Array.isArray(obj)) {
         let rows = obj.map((item, idx) => `<tr><th class='bg-light'>${parentKey}[${idx}]</th><td>${renderFancyTable(item, parentKey + '[' + idx + ']', depth - 1)}</td></tr>`).join('');
-    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
+        return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
     }
     let rows = '';
     for (const key in obj) {
@@ -191,7 +191,7 @@ function renderFancyTable(obj, parentKey = '', depth = null) {
             if (typeof value === 'object' && value !== null) {
                 rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${renderFancyTable(value, parentKey ? parentKey + '.' + key : key, depth - 1)}</td></tr>`;
             } else {
-                rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`;
+                rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td><b>${escapeHtml(value)}</b></td></tr>`;
             }
         }
     }
