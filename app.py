@@ -61,13 +61,26 @@ def upload_file():
 
 
 
-# Extraction endpoint for jpg, png, pdf (POST = refresh, GET = view cached)
+
+# Extraction endpoint for jpg, png, pdf, and pure .json files
 @app.route('/extract/<filename>', methods=['GET', 'POST'])
 def extract_data(filename):
     ext = filename.rsplit('.', 1)[1].lower()
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    # If this is a .json file, just return its contents (GET only)
+    if ext == 'json':
+        if request.method == 'GET':
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as jf:
+                    data = json.load(jf)
+                return jsonify(data)
+            else:
+                return jsonify({'error': 'JSON file not found.'}), 404
+        else:
+            return jsonify({'error': 'Extraction not supported for .json files.'}), 400
+    # For supported types, keep original logic
     if ext not in ['jpg', 'png', 'pdf']:
         return jsonify({'error': 'Extraction only supported for jpg, png, pdf files.'}), 400
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     json_path = file_path + '.json'
     if request.method == 'GET':
         if os.path.exists(json_path):
