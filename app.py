@@ -188,37 +188,6 @@ def upload_file():
     return render_template('index.html', files=files)
 
 
-# Extraction endpoint for jpg, png, pdf
-@app.route('/extract/<filename>', methods=['POST'])
-def extract_data(filename):
-    ext = filename.rsplit('.', 1)[1].lower()
-    if ext not in ['jpg', 'png', 'pdf']:
-        return jsonify({'error': 'Extraction only supported for jpg, png, pdf files.'}), 400
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if not os.path.exists(file_path):
-        return jsonify({'error': 'File not found.'}), 404
-    with open(file_path, 'rb') as f:
-        if ext == 'jpg':
-            mime = 'image/jpeg'
-        elif ext == 'png':
-            mime = 'image/png'
-        elif ext == 'pdf':
-            mime = 'application/pdf'
-        else:
-            mime = 'application/octet-stream'
-        files = {'file': (filename, f, mime)}
-        try:
-            import requests
-            headers = {'Accept': 'application/json', 'filename': filename}
-            response = requests.post(IDP_API_URL, files=files, headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            # Only return the 'result' property if present
-            if 'result' in data:
-                return jsonify({'result': data['result']})
-            return jsonify(data)
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
 
 @app.route('/download/<filename>')
 def download_file(filename):
