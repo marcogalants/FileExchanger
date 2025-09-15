@@ -125,6 +125,11 @@ function extractData(filename, viewOnly) {
                 document.getElementById('extractModalControls').style.display = 'none';
                 document.getElementById('extractModalContent').innerHTML = `<span class='text-danger'>${data.error}</span>`;
             } else {
+                if (!viewOnly) {
+                    // After extraction, reload the page so the file list updates
+                    window.location.reload();
+                    return;
+                }
                 document.getElementById('extractModalControls').style.display = '';
                 lastExtractedMode = 'table';
                 showTableView();
@@ -197,7 +202,7 @@ function renderFancyTable(obj, parentKey = '', depth = null) {
     }
     // Add reduced padding for deep tables
     const cellStyle = isDeep ? 'padding:2px 6px;' : '';
-    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows.replace(/<th /g, `<th style='${cellStyle}' `).replace(/<td /g, `<td style='${cellStyle}' `)}</tbody></table></div>`;
+    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows.replace(/<th /g, `<th style='font-weight:normal;${cellStyle}' `).replace(/<td /g, `<td style='${cellStyle}' `)}</tbody></table></div>`;
 }
 
 function escapeHtml(text) {
