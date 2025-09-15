@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supplier Portal - Send Files to Buyer</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #f8fafc; }
@@ -111,20 +111,31 @@ function extractData(filename) {
 // Recursively render JSON as a fancy Bootstrap table
 function renderFancyTable(obj, parentKey = '') {
     if (typeof obj !== 'object' || obj === null) {
-        return `<span>${obj}</span>`;
+        return `<span>${escapeHtml(obj)}</span>`;
+    }
+    if (Array.isArray(obj)) {
+        let rows = obj.map((item, idx) => `<tr><th class='bg-light'>${parentKey}[${idx}]</th><td>${renderFancyTable(item, parentKey + '[' + idx + ']')}</td></tr>`).join('');
+        return `<div class="table-responsive" style="min-width:600px;max-width:100vw;"><table class="table table-bordered table-striped align-middle w-100"><tbody>${rows}</tbody></table></div>`;
     }
     let rows = '';
     for (const key in obj) {
         if (Object.hasOwn(obj, key)) {
             const value = obj[key];
             if (typeof value === 'object' && value !== null) {
-                rows += `<tr><th class="bg-light">${parentKey ? parentKey + '.' : ''}${key}</th><td>${renderFancyTable(value, parentKey ? parentKey + '.' + key : key)}</td></tr>`;
+                rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${renderFancyTable(value, parentKey ? parentKey + '.' + key : key)}</td></tr>`;
             } else {
-                rows += `<tr><th class="bg-light">${parentKey ? parentKey + '.' : ''}${key}</th><td>${value}</td></tr>`;
+                rows += `<tr><th class='bg-light'>${parentKey ? parentKey + '.' : ''}${escapeHtml(key)}</th><td>${escapeHtml(value)}</td></tr>`;
             }
         }
     }
-    return `<div class="table-responsive"><table class="table table-bordered table-striped align-middle"><tbody>${rows}</tbody></table></div>`;
+    return `<div class="table-responsive" style="min-width:600px;max-width:100vw;"><table class="table table-bordered table-striped align-middle w-100"><tbody>${rows}</tbody></table></div>`;
+}
+
+function escapeHtml(text) {
+    if (typeof text !== 'string') return text;
+    return text.replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
 }
 
 let deleteModal = null;
