@@ -182,7 +182,7 @@ function renderFancyTable(obj, parentKey = '', depth = null) {
     }
     if (Array.isArray(obj)) {
         let rows = obj.map((item, idx) => `<tr><th class='bg-light'>${parentKey}[${idx}]</th><td>${renderFancyTable(item, parentKey + '[' + idx + ']', depth - 1)}</td></tr>`).join('');
-        return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped align-middle w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
+    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
     }
     let rows = '';
     for (const key in obj) {
@@ -195,7 +195,9 @@ function renderFancyTable(obj, parentKey = '', depth = null) {
             }
         }
     }
-    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped align-middle w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows}</tbody></table></div>`;
+    // Add reduced padding for deep tables
+    const cellStyle = isDeep ? 'padding:2px 6px;' : '';
+    return `<div class="table-responsive" style="width:100%;overflow-x:auto;"><table class="table table-bordered table-striped w-100" style="${isDeep ? 'font-family:monospace;font-size:0.85em;word-break:break-all;white-space:pre-wrap;' : ''}"><tbody>${rows.replace(/<th /g, `<th style='${cellStyle}' `).replace(/<td /g, `<td style='${cellStyle}' `)}</tbody></table></div>`;
 }
 
 function escapeHtml(text) {
