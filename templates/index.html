@@ -36,14 +36,15 @@
         </form>
         <h5>Files Ready to Send</h5>
         <ul class="list-group file-list mb-2">
-            {% for file in files %}
+            {% set real_files = files | reject('search', '\\.json$') | list %}
+            {% for file in real_files %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ file }}</span>
                 <div class="btn-group" role="group">
                     <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
                     {% set ext = file.rsplit('.', 1)[1].lower() %}
+                    {% set json_file = file + '.json' %}
                     {% if ext in ['jpg', 'png', 'pdf'] %}
-                        {% set json_file = file + '.json' %}
                         {% if json_file in files %}
                             <button class="btn btn-sm btn-outline-info ms-2" onclick="extractData('{{ file }}', true)">View Extraction Data</button>
                             <button class="btn btn-sm btn-outline-warning ms-2" onclick="extractData('{{ file }}', false)">Refresh Extraction Data</button>
@@ -85,7 +86,8 @@
 <!-- Modal -->
 <div class="modal fade" id="extractModal" tabindex="-1" aria-labelledby="extractModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-    <div class="modal-content" style="min-width:900px;max-width:1400px;width:100%;">
+    <div class="modal-dialog-centered" style="min-width:900px;max-width:1400px;width:100%;margin:auto;">
+        <div class="modal-content" style="min-width:900px;max-width:1400px;width:100%;margin:auto;">
             <div class="modal-header">
             <h5 class="modal-title" id="extractModalLabel">Data Extraction Preview</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
