@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'jpg','png','pdf', 'xls', 'xlsx'}
+ALLOWED_EXTENSIONS = {'jpg','png','pdf', 'xls', 'xlsx', 'json'}
 IDP_API_URL = 'https://idp-caller-2j1ful.5sc6y6-4.usa-e2.cloudhub.io/api/idp'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -48,7 +48,15 @@ def upload_file():
             flash('Allowed file types are pdf, jpg, png, xls, xlsx')
             return redirect(request.url)
     all_files = os.listdir(app.config['UPLOAD_FOLDER'])
+    # List of files to show: all non-.json files, plus orphan .json files (no corresponding original)
     files = [f for f in all_files if not f.endswith('.json')]
+    orphan_jsons = []
+    for f in all_files:
+        if f.endswith('.json'):
+            orig = f[:-5]
+            if orig not in all_files:
+                orphan_jsons.append(f)
+    files += orphan_jsons
     return render_template('index.html', files=files, all_files=all_files)
 
 

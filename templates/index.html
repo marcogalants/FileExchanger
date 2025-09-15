@@ -40,18 +40,24 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ file }}</span>
                 <div class="btn-group" role="group">
-                    <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
                     {% set ext = file.rsplit('.', 1)[1].lower() %}
-                    {% set json_file = file + '.json' %}
-                    {% if ext in ['jpg', 'png', 'pdf'] %}
-                        {% if json_file in all_files %}
-                            <button class="btn btn-sm btn-outline-info ms-2" onclick="extractData('{{ file }}', true)">View Extraction Data</button>
-                            <button class="btn btn-sm btn-outline-warning ms-2" onclick="extractData('{{ file }}', false)">Refresh Extraction Data</button>
-                        {% else %}
-                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}', false)">Extract Data</button>
+                    {% if not file.endswith('.json') %}
+                        <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-outline-success">Download</a>
+                        {% set json_file = file + '.json' %}
+                        {% if ext in ['jpg', 'png', 'pdf'] %}
+                            {% if json_file in all_files %}
+                                <button class="btn btn-sm btn-outline-info ms-2" onclick="extractData('{{ file }}', true)">View Extraction Data</button>
+                                <button class="btn btn-sm btn-outline-warning ms-2" onclick="extractData('{{ file }}', false)">Refresh Extraction Data</button>
+                            {% else %}
+                                <button class="btn btn-sm btn-outline-primary ms-2" onclick="extractData('{{ file }}', false)">Extract Data</button>
+                            {% endif %}
                         {% endif %}
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteModal('{{ file }}')">Delete</button>
+                    {% else %}
+                        {# orphan .json file #}
+                        <button class="btn btn-sm btn-outline-info ms-2" onclick="extractData('{{ file }}', true)">View JSON Data</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteModal('{{ file }}')">Delete</button>
                     {% endif %}
-                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteModal('{{ file }}')">Delete</button>
                 </div>
             </li>
             {% else %}
