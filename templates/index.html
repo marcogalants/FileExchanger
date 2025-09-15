@@ -85,7 +85,7 @@
 <!-- Modal -->
 <div class="modal fade" id="extractModal" tabindex="-1" aria-labelledby="extractModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-    <div class="modal-content" style="min-width:900px;max-width:1200px;">
+    <div class="modal-content" style="min-width:900px;max-width:1400px;width:100%;">
             <div class="modal-header">
             <h5 class="modal-title" id="extractModalLabel">Data Extraction Preview</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -123,7 +123,7 @@ function renderFancyTable(obj, parentKey = '') {
     }
     if (Array.isArray(obj)) {
         let rows = obj.map((item, idx) => `<tr><th class='bg-light'>${parentKey}[${idx}]</th><td>${renderFancyTable(item, parentKey + '[' + idx + ']')}</td></tr>`).join('');
-    return `<div class="table-responsive" style="min-width:900px;max-width:1200px;"><table class="table table-bordered table-striped align-middle w-100"><tbody>${rows}</tbody></table></div>`;
+    return `<div class="table-responsive" style="min-width:900px;max-width:1400px;width:100%;"><table class="table table-bordered table-striped align-middle w-100"><tbody>${rows}</tbody></table></div>`;
     }
     let rows = '';
     for (const key in obj) {
