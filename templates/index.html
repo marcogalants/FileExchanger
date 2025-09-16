@@ -20,7 +20,10 @@
 <div class="container">
     <div class="card p-4">
 
-        <h2 class="mb-4 text-center"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">DEMO Portal</h2>
+        <h2 class="mb-4 text-center">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="vertical-align:middle;margin-right:18px;max-height:48px;">
+            <span style="vertical-align:middle;">DEMO Portal</span>
+        </h2>
         <p class="text-center text-muted mb-4">Upload your documents (PDF, Excel, Images) to send them securely to your buyer. You can also extract data from your files before sending.</p>
         {% with messages = get_flashed_messages() %}
           {% if messages %}
